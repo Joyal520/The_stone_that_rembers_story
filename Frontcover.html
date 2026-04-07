@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Stone That Remembers - Interactive Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;700&family=Special+Elite&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050507;
+            --text-color: #e0e0e0;
+            --accent: #d4af37;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Crimson Pro', serif;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Relevant Background Image */
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('bg.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(60%) brightness(30%);
+            z-index: 0;
+        }
+
+        /* ... (existing styles) ... */
+
+        /* Updated Modal Styles for Glassbox & Scrolling */
+        .modal-content {
+            background: rgba(20, 20, 25, 0.65);
+            /* More transparent for glass effect */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            /* Limit height */
+            overflow-y: auto;
+            /* Enable scrolling */
+            text-align: center;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            transition: transform 0.5s ease;
+            border-radius: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) transparent;
+        }
+
+        /* Custom Scrollbar for Webkit */
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background-color: var(--accent);
+            border-radius: 20px;
+        }
+
+        /* Shadow Entities with Glowing Eyes */
+        .shadow-entity {
+            position: absolute;
+            width: 150px;
+            height: 300px;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9) 0%, transparent 70%);
+            filter: blur(20px);
+            z-index: 3;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        .eyes {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .eye {
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px #fff, 0 0 20px 5px rgba(255, 255, 255, 0.5);
+            animation: blink 4s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            90%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            95% {
+                transform: scaleY(0.1);
+            }
+        }
+
+        /* Ambient Background Particles */
+        #dust-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.95) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .menu-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+            width: 90%;
+            max-width: 800px;
+            animation: fadeIn 3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .title-main {
+            font-family: 'Special Elite', cursive;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            line-height: 1;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .author-tag {
+            font-size: 0.8rem;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            opacity: 0.9;
+        }
+
+        .genre-badge {
+            display: inline-block;
+            padding: 4px 16px;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            color: #ff4d4d;
+            background: rgba(50, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .btn-menu {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 1.2rem 4rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            width: 300px;
+            backdrop-filter: blur(15px);
+        }
+
+        .btn-menu:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(212, 175, 55, 0.05);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .btn-quit:hover {
+            border-color: #ff4d4d;
+            color: #ff4d4d;
+        }
+
+        #story-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #070709;
+            overflow-y: auto;
+            z-index: 100;
+            padding: 8vh 12vw;
+            display: none;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) transparent;
+        }
+
+        .chapter-card {
+            max-width: 750px;
+            margin: 0 auto 12rem auto;
+            line-height: 1.9;
+            font-size: 1.25rem;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1.2s ease;
+        }
+
+        .chapter-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chapter-title {
+            font-family: 'Special Elite', cursive;
+            font-size: 2.2rem;
+            margin-bottom: 3rem;
+            color: var(--accent);
+            text-align: center;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- AUDIO ASSETS -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="Desert.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickSound" preload="auto">
+        <source src="click.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="background-image"></div>
+    <div id="entities-container"></div>
+    <canvas id="dust-canvas"></canvas>
+    <div class="overlay"></div>
+
+    <!-- MAIN MENU -->
+    <div class="menu-container" id="mainMenu">
+        <div class="genre-badge">Supernatural Horror</div>
+        <h1 class="title-main">The Stone <br>That Remembers</h1>
+        <div class="author-tag">By R.J. Roshan</div>
+
+        <div class="button-group">
+            <button class="btn-menu" onclick="startExperience(this)">Start Reading</button>
+            <button class="btn-menu" onclick="showBlurb()">Read Blurb</button>
+            <button class="btn-menu" onclick="showChapters()">Select Chapter</button>
+            <button class="btn-menu btn-quit" onclick="quitApp()">Quit</button>
+        </div>
+    </div>
+
+    <!-- BLURB MODAL -->
+    <div id="blurb-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">The Legend</h2>
+            <div class="modal-body">
+                <p>Vihaan’s first assignment should have been simple: deliver a sealed document across the Pinnacle
+                    Desert before morning. No delays. No questions. No mistakes.</p>
+                <p>But deserts remember.</p>
+                <p>When an accident leaves a mysterious stone disturbed, time begins to fracture. Roads repeat. Shadows
+                    whisper. Night refuses to move forward. Trapped in a looping stretch of sand, Vihaan discovers that
+                    the desert is not empty—it is guarded by ancient forces, bound by stones meant to keep something far
+                    worse asleep.</p>
+                <p>As fear twists reality and repetition erodes his memory, Vihaan must choose between escape and
+                    responsibility. To restore balance, he must face what the desert demands—and what it will take from
+                    him in return.</p>
+                <p>This is not a story about survival alone.</p>
+                <p class="highlight-text">It is about what happens <strong>after</strong> balance is restored…<br>and
+                    what the desert keeps.</p>
+            </div>
+            <button class="btn-menu small-btn" onclick="hideModals()">Close</button>
+        </div>
+    </div>
+
+    <!-- CHAPTER SELECTION MODAL -->
+    <div id="chapter-modal" class="modal-overlay">
+        <div class="modal-content wide-modal">
+            <h2 class="modal-title">Select Entry Point</h2>
+            <div class="chapter-grid">
+                <button onclick="goToChapter(1)">1. The Broken Road</button>
+                <button onclick="goToChapter(2)">2. The First Loop</button>
+                <button onclick="goToChapter(3)">3. The Shadow in the Mirror</button>
+                <button onclick="goToChapter(4)">4. The Reset</button>
+                <button onclick="goToChapter(5)">5. The Weight of Repetition</button>
+                <button onclick="goToChapter(6)">6. The City That Should Not Exist</button>
+                <button onclick="goToChapter(7)">7. The Price of Balance</button>
+                <button onclick="goToChapter(8)">8. The Moment of Correction</button>
+                <button onclick="goToChapter(9)">9. The Road That Moved Forward</button>
+                <button onclick="goToChapter(10)">10. What the Desert Keeps</button>
+            </div>
+            <button class="btn-menu small-btn" onclick="hideModals()">Close</button>
+        </div>
+    </div>
+
+    <!-- STORY CONTENT (Hidden, used for fallback or if we want to expand later) -->
+    <div id="story-viewer">
+        <div id="content-target"></div>
+        <div class="text-center py-24">
+            <button class="btn-menu" onclick="returnToMenu()">Return to Title</button>
+        </div>
+    </div>
+
+    <style>
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            font-family: 'Special Elite', cursive;
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .modal-body p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .highlight-text {
+            color: #d4af37;
+            font-style: italic;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+        }
+
+        .wide-modal {
+            max-width: 900px;
+        }
+
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .chapter-grid button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 15px;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .chapter-grid button:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .small-btn {
+            padding: 10px 30px;
+            width: auto;
+            margin-top: 20px;
+            font-size: 0.8rem;
+        }
+    </style>
+
+    <script>
+        // --- Audio Logic ---
+        const bgMusic = document.getElementById('bgMusic');
+        const clickSound = document.getElementById('clickSound');
+
+        bgMusic.volume = 0.3; // Minimal background sound
+
+        function playClick() {
+            clickSound.currentTime = 0;
+            clickSound.play().catch(() => { });
+        }
+
+        // Add click sound to all buttons
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('click', playClick);
+        });
+
+        // Background Particles
+        const canvas = document.getElementById('dust-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5,
+                    vx: (Math.random() - 0.5) * 0.2,
+                    vy: Math.random() * 0.3,
+                    opacity: Math.random() * 0.5
+                });
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.y > canvas.height) p.y = -10;
+                if (p.x > canvas.width) p.x = 0;
+                ctx.fillStyle = `rgba(212, 175, 55, ${p.opacity})`;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // Shadow Entities Logic
+        function createEntities() {
+            const container = document.getElementById('entities-container');
+            for (let i = 0; i < 4; i++) {
+                const entity = document.createElement('div');
+                entity.className = 'shadow-entity';
+                entity.innerHTML = `<div class="eyes"><div class="eye"></div><div class="eye"></div></div>`;
+                container.appendChild(entity);
+                moveEntity(entity);
+            }
+        }
+
+        function moveEntity(el) {
+            const x = Math.random() * (window.innerWidth - 150);
+            const y = Math.random() * (window.innerHeight - 300);
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            el.style.opacity = Math.random() > 0.5 ? '0.6' : '0';
+
+            setTimeout(() => moveEntity(el), 4000 + Math.random() * 4000);
+        }
+
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        animate();
+        createEntities();
+
+        function startExperience(btn) {
+            playClick();
+
+            // Try to start music on interaction
+            bgMusic.play().catch(e => console.log("Audio requires interaction"));
+
+            const menu = document.getElementById('mainMenu');
+
+            btn.innerHTML = "ENTERING...";
+            btn.style.pointerEvents = "none";
+
+            // Fade out the menu
+            menu.classList.add('fade-out');
+            document.querySelectorAll('.shadow-entity').forEach(e => e.style.opacity = '0');
+
+            // Redirect to Chapter 1 after fade out
+            setTimeout(() => {
+                window.location.href = 'chapter1.html';
+            }, 1500);
+        }
+
+        function showBlurb() {
+            playClick();
+            document.getElementById('blurb-modal').classList.add('active');
+        }
+
+        function showChapters() {
+            playClick();
+            document.getElementById('chapter-modal').classList.add('active');
+        }
+
+        function hideModals() {
+            playClick();
+            document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+        }
+
+        function goToChapter(num) {
+            playClick();
+            // Using flashscreen behavior logic if we were navigating between chapters, 
+            // but from menu we just go directly.
+            const menu = document.getElementById('mainMenu');
+            const modal = document.getElementById('chapter-modal');
+
+            modal.style.opacity = '0';
+            menu.style.opacity = '0';
+
+            setTimeout(() => {
+                window.location.href = `chapter${num}.html`;
+            }, 800);
+        }
+
+        function quitApp() { window.location.href = 'index.html'; }
+
+        // Parallax
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX * -0.015);
+            const moveY = (e.clientY * -0.015);
+            document.body.style.backgroundPosition = `calc(50% + ${moveX}px) calc(50% + ${moveY}px)`;
+        });
+    </script>
+</body>
+
+</html>

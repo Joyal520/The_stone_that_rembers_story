@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The City That Should Not Exist - Chapter 6</title>
+
+    <style>
+        :root {
+            --bg-color: #0a0a0c;
+            --text-color: #e0e0e0;
+            --accent: #d4af37;
+            --card-bg: rgba(20, 20, 25, 0.82);
+            --shadow-opacity: 0.99;
+            --lit-text: #ffffff;
+            --torch-size: 15%;
+            --torch-spread: 45%;
+            --muted: rgba(224, 224, 224, 0.72);
+            --border: rgba(128, 128, 128, 0.22);
+            --soft: rgba(255, 255, 255, 0.06);
+            --danger: #dc2626;
+            --radius: 10px;
+        }
+
+        body.theme-light {
+            --bg-color: #ffffff;
+            --text-color: #09090b;
+            --accent: #1d4ed8;
+            --card-bg: #fdfdfd;
+            --shadow-opacity: 0;
+            --lit-text: #09090b;
+            --muted: rgba(9, 9, 11, 0.70);
+            --border: rgba(0, 0, 0, 0.12);
+            --soft: rgba(0, 0, 0, 0.04);
+            --danger: #b91c1c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: Georgia, "Times New Roman", Times, serif;
+            overflow-x: hidden;
+            transition: background 0.8s ease, color 0.5s ease;
+            min-height: 100vh;
+            touch-action: pan-y;
+        }
+
+        /* Layout */
+        .page {
+            padding: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .page {
+                padding: 48px;
+            }
+        }
+
+        .container-header {
+            max-width: 820px;
+            margin: 0 auto 64px auto;
+            text-align: center;
+            position: relative;
+            z-index: 60;
+        }
+
+        .container-main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding-bottom: 120px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        h1,
+        h2 {
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 6vw, 4rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: clamp(1.1rem, 2.3vw, 1.6rem);
+            font-weight: 300;
+            font-style: italic;
+            opacity: 0.88;
+        }
+
+        /* Background */
+        .parallax-bg {
+            position: fixed;
+            inset: -10%;
+            width: 120%;
+            height: 120%;
+            background:
+                radial-gradient(900px 450px at 30% 20%, rgba(255, 255, 255, 0.06), transparent 60%),
+                radial-gradient(800px 400px at 80% 70%, rgba(255, 255, 255, 0.04), transparent 65%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 40%),
+                #050507;
+            z-index: -2;
+            will-change: transform;
+            transition: opacity 0.8s ease;
+            filter: grayscale(1) brightness(0.9);
+        }
+
+        .bg-image {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            background-image: url("bg.jpg");
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            filter: grayscale(1) brightness(0.25);
+            opacity: 0.9;
+            transition: opacity 0.8s ease;
+        }
+
+        /* UI Enhancements */
+        #progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.1s;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        body.theme-light .parallax-bg {
+            opacity: 0;
+        }
+
+        body.theme-light .bg-image {
+            opacity: 0.28;
+            filter: grayscale(1) brightness(1.2) contrast(0.9);
+            mix-blend-mode: multiply;
+        }
+
+        /* Drop Caps */
+        .story-card p:first-of-type::first-letter {
+            font-family: "Special Elite", serif;
+            font-size: 3.5rem;
+            float: left;
+            line-height: 0.8;
+            margin-right: 0.1em;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Animated Text */
+        .danger {
+            color: var(--danger);
+            font-weight: 800;
+            display: inline-block;
+            animation: shake 5s infinite;
+        }
+
+        .whisper {
+            font-style: italic;
+            letter-spacing: 0.1em;
+            opacity: 0.8;
+            animation: breathe 4s infinite;
+        }
+
+        @keyframes shake {
+
+            0%,
+            90%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            92% {
+                transform: translate(-1px, 1px);
+            }
+
+            94% {
+                transform: translate(1px, -1px);
+            }
+
+            96% {
+                transform: translate(-1px, -1px);
+            }
+
+            98% {
+                transform: translate(1px, 1px);
+            }
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                opacity: 0.8;
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+            }
+
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        /* Torch shadow */
+        .shadow-move {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at var(--x) var(--y),
+                    transparent var(--torch-size),
+                    rgba(0, 0, 0, 0.40) 25%,
+                    rgba(0, 0, 0, var(--shadow-opacity)) var(--torch-spread));
+            pointer-events: none;
+            z-index: 50;
+            will-change: transform;
+            transition: opacity 0.5s ease;
+        }
+
+        body.theme-light .shadow-move {
+            opacity: 0;
+            display: none;
+        }
+
+        /* Ghost layer */
+        .ghost-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        .ghost {
+            position: absolute;
+            width: 120px;
+            height: 200px;
+            opacity: 0.15;
+            filter: blur(15px);
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), transparent);
+            border-radius: 50% 50% 20% 20%;
+            transition: transform 0.2s ease-out;
+        }
+
+        .eyes {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .eye {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white, 0 0 20px white;
+            animation: blink var(--blink-speed) infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            90%,
+            100% {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+
+            95% {
+                transform: scaleY(0);
+                opacity: 0;
+            }
+        }
+
+        body.theme-light .ghost {
+            display: none;
+        }
+
+        /* Cards */
+        .story-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border-left: 3px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px;
+            line-height: 1.72;
+            font-size: 1.12rem;
+            transition: transform 0.35s ease, background 0.5s ease, border-color 0.5s ease;
+            position: relative;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        @media (min-width: 768px) {
+            .story-card {
+                padding: 34px;
+                font-size: 1.15rem;
+            }
+        }
+
+        body.theme-light .story-card {
+            border-left-color: var(--accent);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.10);
+        }
+
+        .story-card p {
+            margin: 0;
+            transition: transform 0.35s ease, color 0.35s ease, text-shadow 0.35s ease;
+        }
+
+        .story-card p+p {
+            margin-top: 14px;
+        }
+
+        body:not(.theme-light) .pop-effect {
+            transform: scale(1.03);
+            color: var(--lit-text) !important;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.28);
+        }
+
+        .muted {
+            opacity: 0.75;
+            color: var(--muted);
+        }
+
+        .bold {
+            font-weight: 800;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .caps {
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+        }
+
+        .big-center {
+            text-align: center;
+            font-weight: 900;
+            font-size: 1.65rem;
+            margin: 18px 0;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .final-line {
+            text-align: center;
+            font-size: 1.9rem;
+            font-weight: 900;
+            margin-top: 18px;
+            letter-spacing: -0.02em;
+        }
+
+        /* Header buttons */
+        .btn-row {
+            margin-top: 26px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-action {
+            border: 1px solid rgba(128, 128, 128, 0.30);
+            color: var(--text-color);
+            background: var(--card-bg);
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            z-index: 100;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body.theme-light .btn-action {
+            border-color: rgba(0, 0, 0, 0.15);
+            font-weight: 800;
+        }
+
+        .btn-action:hover,
+        .btn-action:active {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.04);
+        }
+
+        /* Flicker */
+        .flicker {
+            animation: flicker-animation 6s infinite;
+        }
+
+        @keyframes flicker-animation {
+
+            0%,
+            90%,
+            100% {
+                opacity: 1;
+            }
+
+            92%,
+            96% {
+                opacity: 0.7;
+            }
+        }
+
+        .help {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            opacity: 0.75;
+        }
+    </style>
+</head>
+
+<body class="page theme-light">
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+    <div class="bg-image" aria-hidden="true"></div>
+    <div id="bg" class="parallax-bg" aria-hidden="true"></div>
+    <div id="shadow" class="shadow-move" style="--x:50%;--y:50%;" aria-hidden="true"></div>
+    <div class="ghost-container" id="ghostLayer" aria-hidden="true"></div>
+
+    <!-- Audio Elements -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="Desert.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickSound" preload="auto">
+        <source src="click.mp3" type="audio/mpeg">
+    </audio>
+
+    <header class="container-header">
+        <h1 class="flicker">CHAPTER 6</h1>
+        <h2>The City That Should Not Exist</h2>
+
+        <div class="btn-row">
+            <button onclick="toggleMusic()" id="musicBtn" class="btn-action">Ambient Sound</button>
+            <button onclick="toggleTheme()" id="themeBtn" class="btn-action">Toggle Theme</button>
+            <button onclick="readStory()" id="narrateBtn" class="btn-action">Narrate (Natural)</button>
+        </div>
+    </header>
+
+    <main class="container-main" id="storyRoot">
+
+        <section class="story-card">
+            <p>Vihaan walked toward the city slowly.</p>
+            <p>He expected the desert to stop him. He expected the ground to pull him back or the sky to flicker and
+                reset again. But nothing happened. Each step felt real. The sand shifted naturally under his feet. The
+                air grew warmer as he moved closer to the light, as if the city carried its own weather.</p>
+            <p>Behind him, the leaning stone remained silent. Ahead of him, the city grew clearer.</p>
+        </section>
+
+        <section class="story-card">
+            <p>At first, it looked like a mirage—shapes trembling in the heat, edges blurred, as if the desert tried to
+                hide it. But with every step, the walls sharpened. Stone blocks rose out of the sand. Fires burned in
+                metal bowls along wide paths. The sound of voices drifted through the air, calm and steady.</p>
+            <p>This was not a ruined city. <span class="bold">It was alive.</span></p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan slowed at the edge, waiting for someone to stop him. No guards appeared. No warnings. No raised
+                weapons. The city welcomed him with quiet stillness, like it had already decided he belonged there.</p>
+            <p>People walked along the paths. Men and women wore simple clothes made of rough fabric. Children sat near
+                fires, drawing shapes in the sand. Old people rested against stone walls, watching the flames.</p>
+            <p>All of them looked human. <span class="italic">Too human.</span></p>
+            <p>Their faces were familiar in a strange way—like people he had seen in dreams and forgotten the moment he
+                woke. They moved calmly, but their calm felt practiced, like a mask they wore to hide something
+                underneath.</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan stepped inside.</p>
+            <p>The moment he crossed the invisible boundary, the fear in his chest loosened. His breathing slowed. His
+                thoughts became clearer, lighter, almost peaceful.</p>
+            <p>And that frightened him.</p>
+            <p>Fear did not vanish like that. Not in the desert. It felt as if something had reached into his body and
+                turned fear off like a switch.</p>
+        </section>
+
+        <section class="story-card">
+            <p>He swallowed and forced his feet forward.</p>
+            <p>A young woman approached him carrying a clay cup filled with water. She smiled gently and held it out, as
+                if she had been expecting him.</p>
+            <p>“You look tired,” she said.</p>
+            <p>Her voice was soft. Kind. Normal.</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan hesitated, then took the cup. His methods shook as he drank. The water was cool and real. It
+                washed the dust from his throat and eased the tightness in his chest.</p>
+            <p>“Thank you,” he said quietly.</p>
+            <p>The woman nodded and walked away without another word.</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan stood there, confused. No one asked who he was. No one questioned why he had come. It was as if
+                his arrival was not a surprise, but a scheduled event.</p>
+            <p>He walked deeper into the city. Fires crackled softly. The smell of cooked food filled the air.
+                Somewhere, someone laughed—a sound so ordinary it almost hurt.</p>
+        </section>
+
+        <section class="story-card">
+            <p>Yet something felt wrong.</p>
+            <p>The city had too many sounds and not enough life behind them.</p>
+            <p>When he looked closely, he noticed people repeating small actions. A man lifted a basket, set it down,
+                then lifted it again as if he had forgotten he had already done it. A child drew the same circle in the
+                sand, over and over, never changing the shape. A woman stirred a pot that held no steam.</p>
+            <p>They moved like memories looping.</p>
+            <p class="whisper">A cold line of fear returned to Vihaan’s spine.</p>
+        </section>
+
+        <section class="story-card">
+            <p>He glanced at the fires. The flames burned, but the light did not behave properly. It did not spread
+                naturally. It stayed close to the fire bowls, as if the city refused to let darkness leave—or refused to
+                let light escape.</p>
+            <p>Vihaan looked down at his feet. His shadow stretched behind him, clear and dark.</p>
+            <p>He looked up at the people around him.</p>
+            <p class="bold">They cast no shadows.</p>
+            <p>None.</p>
+        </section>
+
+        <section class="story-card">
+            <p>His heart skipped. He stepped to the side, closer to a fire, trying to prove it to himself. The light
+                touched their faces, their hands, their clothing—but no shadow formed on the ground.</p>
+            <p>It was as if the city held only their shapes, not their weight.</p>
+        </section>
+
+        <section class="story-card">
+            <p>He backed away slowly. A child looked up at him and smiled.</p>
+            <p>Then the child’s eyes flicked past Vihaan—over his shoulder—toward the desert. The smile vanished
+                instantly. The child lowered his head and began drawing again, faster now, pressing the stick into the
+                sand as if he had been warned not to look.</p>
+            <p>Vihaan turned, but saw nothing behind him. Still, the hairs on his arms rose.</p>
+        </section>
+
+        <section class="story-card">
+            <p>At the centre of the city, an old man sat near a large fire. His hair was long and white, tied back with
+                a strip of leather. His face was lined deeply, but his eyes were sharp and calm.</p>
+            <p>When Vihaan looked at him, the old man raised his head. Their eyes met.</p>
+            <p>The old man smiled slightly, as if he had been waiting for this moment.</p>
+        </section>
+
+        <section class="story-card">
+            <p>“You have come far,” the old man said.</p>
+            <p>Vihaan swallowed. “Where… where is this place?”</p>
+            <p>The old man did not answer directly. He gestured for Vihaan to sit. “You are safe here. For now.”</p>
+            <p>“For now?” Vihaan repeated.</p>
+        </section>
+
+        <section class="story-card">
+            <p>The old man watched the fire for a moment before speaking again. “This city appears only when the desert
+                is wounded,” he said.</p>
+            <p>Vihaan’s heart began to race again. “I didn’t mean to hurt anything. It was an accident.”</p>
+            <p>The old man nodded. “Most damage is.”</p>
+            <p>Vihaan felt a strange pressure in his chest. “Who are you?”</p>
+        </section>
+
+        <section class="story-card">
+            <p>The old man lifted his eyes to the sky.</p>
+            <p class="whisper">“We are the first keepers of this land. Long before roads. Long before engines. Long
+                before your kind forgot how to listen.”</p>
+            <p>Vihaan shook his head slowly. “That’s not possible. This desert has been empty for centuries.”</p>
+            <p>The old man smiled again, but this time there was sadness in it. “Empty does not mean lifeless. It only
+                means you stopped seeing.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan remembered the spirits. The shadows. The screams. “What about the things outside? The ones in the
+                sand.”</p>
+            <p>The old man’s expression darkened. “They are what came before balance. They fed on fear and chaos. They
+                destroyed without purpose.”</p>
+            <p>“Evil spirits,” Vihaan whispered.</p>
+            <p>“Yes,” the old man said. “We feared them. That fear built the stones.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan looked around the city again, unsettled. “If you built the stones, then why do you look like
+                people?”</p>
+            <p>The old man’s gaze held him.</p>
+            <p class="italic">“We look like what you can accept,”</p>
+            <p>he said.</p>
+            <p>A chill moved through Vihaan. “What does that mean?”</p>
+            <p>The old man did not answer.</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan’s fingers tightened. “I hit one of the stones. That’s why I’m trapped.”</p>
+            <p>The old man closed his eyes briefly. “Yes.”</p>
+            <p>Vihaan leaned forward. “So tell me how to fix it.”</p>
+            <p>The old man opened his eyes again. They seemed brighter now, almost glowing in the firelight. “First, you
+                must understand what you broke.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>He stood slowly, using a carved staff for support. “Come. The night is not finished.”</p>
+            <p>Vihaan followed him through the city. People watched them pass, their faces calm but their eyes heavy, as
+                if they carried a shared secret. As they walked deeper, the city became quieter. The fires burned lower.
+                The warm smell of food faded into something drier.</p>
+        </section>
+
+        <section class="story-card">
+            <p>Then Vihaan noticed something. The symbols. They were everywhere.</p>
+            <p>Carved into doorways. Etched into stones. Painted faintly on cloth. The same style as the leaning stone.
+                The same sharp, desperate lines.</p>
+            <p>And some of them looked fresh. As if someone had carved them recently.</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan stopped walking. “Why are these symbols here?”</p>
+            <p>The old man did not turn back immediately. “They are reminders.”</p>
+            <p>“Reminders of what?”</p>
+            <p>The old man finally looked at him. “Reminders of what happens when balance breaks.”</p>
+            <p>Vihaan’s throat tightened. “Are you trying to help me… or trap me?”</p>
+            <p>For the first time, the old man’s smile vanished. “Both can be true,” he said quietly.</p>
+        </section>
+
+        <section class="story-card">
+            <p>They reached a wide stone platform at the far end of the city. From there, the desert stretched endlessly
+                into darkness.</p>
+            <p>The old man pointed. “You broke a balance stone. It does not trap. It does not punish. It corrects.”</p>
+            <p>“Then why the loop?” Vihaan asked.</p>
+            <p>“Because imbalance repeats itself,” the old man said. “Until it is corrected.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan clenched his fists. “So I just need to stand it upright?”</p>
+            <p>The old man turned to him sharply. “Careful. It is not that simple.”</p>
+            <p>The ground beneath them trembled slightly. Far away, a scream echoed across the desert. Not human.</p>
+            <p>The firelight flickered. Vihaan felt a familiar cold creeping into his chest.</p>
+        </section>
+
+        <section class="story-card">
+            <p>The old man gripped his staff tightly. “They know you are here.”</p>
+            <p>“Who?” Vihaan asked.</p>
+            <p>The old man looked into the darkness. “The ones you freed.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>The city lights dimmed suddenly. The warmth began to fade. The people’s voices became quieter, thinner,
+                like they were being pulled away.</p>
+            <p>Vihaan turned and stared back at the city. For a moment, he saw something he could not explain. One
+                woman’s face flickered—just for a second—into something older, cracked, and empty, like a stone mask.
+            </p>
+            <p>Then it returned to normal.</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan stepped back, heart pounding. “What are you?” he whispered.</p>
+            <p>The old man did not answer. He only said, “Walk carefully, Vihaan.”</p>
+            <p>Then he added, almost too softly to hear:</p>
+            <p class="whisper">“Because if the desert cannot correct you… it will replace you.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>And Vihaan realised something terrifying. The city was not permanent. It was already disappearing.</p>
+            <p>And the evil outside was getting closer.</p>
+            <p class="final-line">But worse than that—He could no longer tell which side truly wanted him alive.</p>
+        </section>
+
+        <div class="btn-row" style="margin-top: 60px; margin-bottom: 40px;">
+            <button onclick="window.location.href='Frontcover.html'" class="btn-action">Home</button>
+            <button onclick="window.location.href='chapter5.html'" class="btn-action">Previous Chapter</button>
+            <button onclick="window.location.href='chapter7.html'" class="btn-action">Next Chapter</button>
+        </div>
+
+    </main>
+
+    <script>
+        const shadow = document.getElementById('shadow');
+        const bg = document.getElementById('bg');
+        const ghostLayer = document.getElementById('ghostLayer');
+        const bgMusic = document.getElementById('bgMusic');
+        const clickSound = document.getElementById('clickSound');
+
+        bgMusic.volume = 0.3; // Minimal
+
+        function playClick() {
+            clickSound.currentTime = 0;
+            clickSound.play().catch(() => { });
+        }
+
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('click', playClick);
+        });
+
+        function getParagraphs() { return document.querySelectorAll('.story-card p'); }
+
+        // Ghosts
+        const ghosts = [];
+        for (let i = 0; i < 5; i++) {
+            const g = document.createElement('div');
+            g.className = 'ghost';
+            g.style.left = (Math.random() * 80 + 10) + '%';
+            g.style.top = (Math.random() * 80 + 10) + '%';
+            g.innerHTML = `
+        <div class="eyes">
+          <div class="eye" style="--blink-speed:${(3 + Math.random() * 5).toFixed(2)}s"></div>
+          <div class="eye" style="--blink-speed:${(3 + Math.random() * 5).toFixed(2)}s"></div>
+        </div>`;
+            ghostLayer.appendChild(g);
+            ghosts.push({ el: g, factor: 0.02 + Math.random() * 0.03 });
+        }
+
+        function updateTorch(x, y) {
+            const isLightMode = document.body.classList.contains('theme-light');
+            const paragraphs = getParagraphs();
+
+            if (!isLightMode) {
+                shadow.style.setProperty('--x', `${(x / window.innerWidth) * 100}%`);
+                shadow.style.setProperty('--y', `${(y / window.innerHeight) * 100}%`);
+                bg.style.transform = `translate(${(window.innerWidth / 2 - x) / 50}px, ${(window.innerHeight / 2 - y) / 50}px) scale(1.06)`;
+
+                ghosts.forEach(g => {
+                    g.el.style.transform = `translate(${(window.innerWidth / 2 - x) * g.factor}px, ${(window.innerHeight / 2 - y) * g.factor}px)`;
+                });
+            }
+
+            paragraphs.forEach(p => {
+                if (isLightMode) {
+                    p.classList.remove('pop-effect');
+                    return;
+                }
+                const rect = p.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const dist = Math.hypot(x - centerX, y - centerY);
+                p.classList.toggle('pop-effect', dist < 220);
+            });
+        }
+
+        document.addEventListener('mousemove', (e) => updateTorch(e.clientX, e.clientY));
+        document.addEventListener('touchmove', (e) => {
+            if (!e.touches || !e.touches[0]) return;
+            updateTorch(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+
+        function toggleTheme() {
+            document.body.classList.toggle('theme-light');
+            if (document.body.classList.contains('theme-light')) {
+                getParagraphs().forEach(p => p.classList.remove('pop-effect'));
+            }
+        }
+
+        function toggleMusic() {
+            const musicBtn = document.getElementById('musicBtn');
+            if (bgMusic.paused) {
+                bgMusic.play()
+                    .then(() => { musicBtn.innerText = "Silence"; })
+                    .catch(() => alert("Interact with info first!"));
+            } else {
+                bgMusic.pause();
+                musicBtn.innerText = "Ambient Sound";
+            }
+        }
+
+
+
+        window.addEventListener('scroll', () => {
+            const st = document.documentElement.scrollTop || document.body.scrollTop;
+            const sh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const pct = (st / sh) * 100;
+            document.getElementById('progress-bar').style.width = pct + "%";
+        });
+
+        window.addEventListener('load', () => {
+            updateTorch(window.innerWidth * 0.5, window.innerHeight * 0.35);
+        });
+    </script>
+<script src="story-utils.js"></script>
+</body>
+
+</html>

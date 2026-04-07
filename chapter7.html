@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Price of Balance - Chapter 7</title>
+
+    <style>
+        :root {
+            --bg-color: #0a0a0c;
+            --text-color: #e0e0e0;
+            --accent: #d4af37;
+            --card-bg: rgba(20, 20, 25, 0.82);
+            --shadow-opacity: 0.99;
+            --lit-text: #ffffff;
+            --torch-size: 15%;
+            --torch-spread: 45%;
+            --muted: rgba(224, 224, 224, 0.72);
+            --border: rgba(128, 128, 128, 0.22);
+            --soft: rgba(255, 255, 255, 0.06);
+            --danger: #dc2626;
+            --radius: 10px;
+        }
+
+        body.theme-light {
+            --bg-color: #ffffff;
+            --text-color: #09090b;
+            --accent: #1d4ed8;
+            --card-bg: #fdfdfd;
+            --shadow-opacity: 0;
+            --lit-text: #09090b;
+            --muted: rgba(9, 9, 11, 0.70);
+            --border: rgba(0, 0, 0, 0.12);
+            --soft: rgba(0, 0, 0, 0.04);
+            --danger: #b91c1c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: Georgia, "Times New Roman", Times, serif;
+            overflow-x: hidden;
+            transition: background 0.8s ease, color 0.5s ease;
+            min-height: 100vh;
+            touch-action: pan-y;
+        }
+
+        /* Layout */
+        .page {
+            padding: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .page {
+                padding: 48px;
+            }
+        }
+
+        .container-header {
+            max-width: 820px;
+            margin: 0 auto 64px auto;
+            text-align: center;
+            position: relative;
+            z-index: 60;
+        }
+
+        .container-main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding-bottom: 120px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        h1,
+        h2 {
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 6vw, 4rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: clamp(1.1rem, 2.3vw, 1.6rem);
+            font-weight: 300;
+            font-style: italic;
+            opacity: 0.88;
+        }
+
+        /* Background */
+        .parallax-bg {
+            position: fixed;
+            inset: -10%;
+            width: 120%;
+            height: 120%;
+            background:
+                radial-gradient(900px 450px at 30% 20%, rgba(255, 255, 255, 0.06), transparent 60%),
+                radial-gradient(800px 400px at 80% 70%, rgba(255, 255, 255, 0.04), transparent 65%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 40%),
+                #050507;
+            z-index: -2;
+            will-change: transform;
+            transition: opacity 0.8s ease;
+            filter: grayscale(1) brightness(0.9);
+        }
+
+        .bg-image {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            background-image: url("bg.jpg");
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            filter: grayscale(1) brightness(0.25);
+            opacity: 0.9;
+            transition: opacity 0.8s ease;
+        }
+
+        /* UI Enhancements */
+        #progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.1s;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        body.theme-light .parallax-bg {
+            opacity: 0;
+        }
+
+        body.theme-light .bg-image {
+            opacity: 0.28;
+            filter: grayscale(1) brightness(1.2) contrast(0.9);
+            mix-blend-mode: multiply;
+        }
+
+        /* Drop Caps */
+        .story-card p:first-of-type::first-letter {
+            font-family: "Special Elite", serif;
+            font-size: 3.5rem;
+            float: left;
+            line-height: 0.8;
+            margin-right: 0.1em;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Animated Text */
+        .danger {
+            color: var(--danger);
+            font-weight: 800;
+            display: inline-block;
+            animation: shake 5s infinite;
+        }
+
+        .whisper {
+            font-style: italic;
+            letter-spacing: 0.1em;
+            opacity: 0.8;
+            animation: breathe 4s infinite;
+        }
+
+        @keyframes shake {
+
+            0%,
+            90%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            92% {
+                transform: translate(-1px, 1px);
+            }
+
+            94% {
+                transform: translate(1px, -1px);
+            }
+
+            96% {
+                transform: translate(-1px, -1px);
+            }
+
+            98% {
+                transform: translate(1px, 1px);
+            }
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                opacity: 0.8;
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+            }
+
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        /* Torch shadow */
+        .shadow-move {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at var(--x) var(--y),
+                    transparent var(--torch-size),
+                    rgba(0, 0, 0, 0.40) 25%,
+                    rgba(0, 0, 0, var(--shadow-opacity)) var(--torch-spread));
+            pointer-events: none;
+            z-index: 50;
+            will-change: transform;
+            transition: opacity 0.5s ease;
+        }
+
+        body.theme-light .shadow-move {
+            opacity: 0;
+            display: none;
+        }
+
+        /* Ghost layer */
+        .ghost-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        .ghost {
+            position: absolute;
+            width: 120px;
+            height: 200px;
+            opacity: 0.15;
+            filter: blur(15px);
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), transparent);
+            border-radius: 50% 50% 20% 20%;
+            transition: transform 0.2s ease-out;
+        }
+
+        .eyes {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .eye {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white, 0 0 20px white;
+            animation: blink var(--blink-speed) infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            90%,
+            100% {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+
+            95% {
+                transform: scaleY(0);
+                opacity: 0;
+            }
+        }
+
+        body.theme-light .ghost {
+            display: none;
+        }
+
+        /* Cards */
+        .story-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border-left: 3px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px;
+            line-height: 1.72;
+            font-size: 1.12rem;
+            transition: transform 0.35s ease, background 0.5s ease, border-color 0.5s ease;
+            position: relative;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        @media (min-width: 768px) {
+            .story-card {
+                padding: 34px;
+                font-size: 1.15rem;
+            }
+        }
+
+        body.theme-light .story-card {
+            border-left-color: var(--accent);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.10);
+        }
+
+        .story-card p {
+            margin: 0;
+            transition: transform 0.35s ease, color 0.35s ease, text-shadow 0.35s ease;
+        }
+
+        .story-card p+p {
+            margin-top: 14px;
+        }
+
+        body:not(.theme-light) .pop-effect {
+            transform: scale(1.03);
+            color: var(--lit-text) !important;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.28);
+        }
+
+        .muted {
+            opacity: 0.75;
+            color: var(--muted);
+        }
+
+        .bold {
+            font-weight: 800;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .caps {
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+        }
+
+        .big-center {
+            text-align: center;
+            font-weight: 900;
+            font-size: 1.65rem;
+            margin: 18px 0;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .final-line {
+            text-align: center;
+            font-size: 1.9rem;
+            font-weight: 900;
+            margin-top: 18px;
+            letter-spacing: -0.02em;
+        }
+
+        /* Header buttons */
+        .btn-row {
+            margin-top: 26px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-action {
+            border: 1px solid rgba(128, 128, 128, 0.30);
+            color: var(--text-color);
+            background: var(--card-bg);
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            z-index: 100;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body.theme-light .btn-action {
+            border-color: rgba(0, 0, 0, 0.15);
+            font-weight: 800;
+        }
+
+        .btn-action:hover,
+        .btn-action:active {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.04);
+        }
+
+        /* Flicker */
+        .flicker {
+            animation: flicker-animation 6s infinite;
+        }
+
+        @keyframes flicker-animation {
+
+            0%,
+            90%,
+            100% {
+                opacity: 1;
+            }
+
+            92%,
+            96% {
+                opacity: 0.7;
+            }
+        }
+
+        .help {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            opacity: 0.75;
+        }
+    </style>
+</head>
+
+<body class="page theme-light">
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+    <div class="bg-image" aria-hidden="true"></div>
+    <div id="bg" class="parallax-bg" aria-hidden="true"></div>
+    <div id="shadow" class="shadow-move" style="--x:50%;--y:50%;" aria-hidden="true"></div>
+    <div class="ghost-container" id="ghostLayer" aria-hidden="true"></div>
+
+    <!-- Audio Elements -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="Desert.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickSound" preload="auto">
+        <source src="click.mp3" type="audio/mpeg">
+    </audio>
+
+    <header class="container-header">
+        <h1 class="flicker">CHAPTER 7</h1>
+        <h2>The Price of Balance</h2>
+
+        <div class="btn-row">
+            <button onclick="toggleMusic()" id="musicBtn" class="btn-action">Ambient Sound</button>
+            <button onclick="toggleTheme()" id="themeBtn" class="btn-action">Toggle Theme</button>
+            <button onclick="readStory()" id="narrateBtn" class="btn-action">Narrate (Natural)</button>
+        </div>
+    </header>
+
+    <main class="container-main" id="storyRoot">
+
+        <section class="story-card">
+            <p>The city dimmed slowly, like a dying fire.</p>
+            <p>Vihaan felt the change in the air before he saw it. The warmth that had wrapped around him began to fade.
+                The sounds of voices grew softer, thinner, as if they were being pulled away by something unseen. Fires
+                still burned, but their light trembled, and the flames bent strangely, leaning toward the desert.</p>
+            <p>The old man stood very still beside him.</p>
+        </section>
+
+        <section class="story-card">
+            <p>“They are coming closer,” the old man said.</p>
+            <p>Vihaan’s heart raced. “The evil spirits?”</p>
+            <p>“Yes,” the old man replied. “They feel the imbalance weakening.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>The ground trembled again, stronger this time. Dust rose from the stone platform and drifted into the
+                air. Far away, in the darkness beyond the city, shapes moved. Vihaan could not see them clearly, but he
+                felt them—watching, waiting.</p>
+            <p>The old man turned to him. “Listen carefully. There is little time.”</p>
+            <p>Vihaan nodded, forcing himself to stay calm.</p>
+        </section>
+
+        <section class="story-card">
+            <p>“The stones were placed to hold the desert in balance,” the old man continued. “Each one was aligned
+                carefully. Height, angle, position. Even a small change creates cracks in time.”</p>
+            <p>Vihaan remembered the crash. The sound of metal. The stone leaning more than before.</p>
+            <p>“I damaged it,” he said. “That’s why time keeps repeating.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>“Yes,” the old man said. “The desert resets because it is trying to correct itself. But it cannot fix
+                what was broken by a human hand.”</p>
+            <p>Vihaan clenched his fists. “So I have to fix it.”</p>
+            <p>The old man nodded slowly. “But balance has a price.”</p>
+            <p>Vihaan looked at him. “What kind of price?”</p>
+        </section>
+
+        <section class="story-card">
+            <p>Before the old man could answer, a sharp scream tore through the air. It came from the desert, closer
+                now. The sound was wrong—too loud, too long, filled with anger.</p>
+            <p>The people of the city reacted immediately. They stopped what they were doing and turned toward the
+                darkness. Their calm faces hardened. Some lowered their heads. Others closed their eyes, as if preparing
+                for something painful.</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan noticed something else.</p>
+            <p>Their bodies were becoming faint. Their edges blurred slightly, like smoke thinning in the wind.</p>
+            <p>“We cannot stay much longer,” the old man said. “The city exists only while balance is broken. When the
+                stone is repaired, we will fade again.”</p>
+            <p>Vihaan swallowed. “Fade… as in disappear?”</p>
+            <p>The old man met his eyes. “As in return.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan felt a strange pain in his chest. He had known these people for only a short time, yet the thought
+                of losing them felt heavy.</p>
+            <p>“You said there was a price,” Vihaan said quietly. “What is it?”</p>
+            <p>The old man raised his staff and pointed toward the desert.</p>
+            <p class="whisper">“To repair the stone,” he said, “you must do it during the reset.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan frowned. “What does that mean?”</p>
+            <p>“You must act at the moment the desert repeats,” the old man said. “When time bends back on itself. That
+                is when the stone is weakest.”</p>
+            <p>Vihaan’s mind raced. “But every time the reset happens, everything returns to how it was.”</p>
+            <p>“Yes,” the old man said. “Everything… except you.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan felt cold. “Except me?”</p>
+            <p>“With every reset,” the old man continued, “a part of you is left behind. A memory. A feeling. A piece of
+                who you are.”</p>
+            <p>Vihaan thought of the blurred days, the lost hours, the moments he could no longer remember clearly.</p>
+            <p>“That’s why I feel different,” he said. “That’s why time feels broken inside my head.”</p>
+            <p>The old man nodded. “The desert takes a price for correction.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan looked toward the darkness where the screams came from. The evil spirits moved closer now. He
+                could see their shapes clearly—tall, twisted, crawling along the sand like living shadows.</p>
+            <p>“If I fail,” Vihaan asked, “what happens?”</p>
+            <p>The old man did not answer immediately.</p>
+            <p>“If you fail,” he said finally, “the stone will fall completely. The locks will break. The desert will
+                belong to them again.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan’s stomach dropped. “And me?”</p>
+            <p>The old man’s voice softened.</p>
+            <p class="danger">“You will become part of the loop.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>Vihaan closed his eyes for a moment. Fear rushed through him, sharp and overwhelming. He wanted to run.
+                He wanted to wake up. He wanted to believe none of this was real.</p>
+            <p>But he couldn’t.</p>
+            <p>He opened his eyes again. “Tell me how,” he said.</p>
+        </section>
+
+        <section class="story-card">
+            <p>The old man placed a hand on Vihaan’s shoulder. It felt solid, warm—real.</p>
+            <p>“You must return to the stone,” he said. “You must lift it, align it, and seal the crack using what you
+                have. Not tools alone. <span class="italic">Intention matters.</span>”</p>
+            <p>Vihaan nodded. “I’ll do it.”</p>
+            <p>The old man looked at him closely. “You will not remember everything after this,” he said. “Some of this
+                will fade.”</p>
+            <p>Vihaan managed a weak smile. “As long as it ends.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>The old man returned the smile, though his eyes were sad. “Go now. The reset is near.”</p>
+            <p>The ground shook violently. The city lights flickered rapidly. Buildings blurred. Fires stretched into
+                lines of light.</p>
+            <p>Vihaan felt the air pull away from him, dragging him backward.</p>
+            <p>“Wait!” he shouted. “Will I see you again?”</p>
+        </section>
+
+        <section class="story-card">
+            <p>The old man’s voice echoed as the city dissolved.</p>
+            <p>“We are always here,” he said. “As long as balance is remembered.”</p>
+            <p>Vihaan stumbled. The world twisted. The sky folded inward. Time snapped back.</p>
+        </section>
+
+        <section class="story-card">
+            <p>He stood beside the jeep again.</p>
+            <p>The stone loomed in front of him, leaning, cracked, waiting.</p>
+            <p>The desert screamed.</p>
+            <p>The evil spirits rushed toward him from every direction.</p>
+            <p>The reset had begun.</p>
+        </section>
+
+        <section class="story-card">
+            <p>And Vihaan realised something terrifying—</p>
+            <p>This time, it might be his last chance.</p>
+            <p class="final-line">Because the stone was already starting to fall.</p>
+        </section>
+
+        <div class="btn-row" style="margin-top: 60px; margin-bottom: 40px;">
+            <button onclick="window.location.href='Frontcover.html'" class="btn-action">Home</button>
+            <button onclick="window.location.href='chapter6.html'" class="btn-action">Previous Chapter</button>
+            <button onclick="window.location.href='chapter8.html'" class="btn-action">Next Chapter</button>
+        </div>
+
+    </main>
+
+    <script>
+        const shadow = document.getElementById('shadow');
+        const bg = document.getElementById('bg');
+        const ghostLayer = document.getElementById('ghostLayer');
+        const bgMusic = document.getElementById('bgMusic');
+        const clickSound = document.getElementById('clickSound');
+
+        bgMusic.volume = 0.3; // Minimal
+
+        function playClick() {
+            clickSound.currentTime = 0;
+            clickSound.play().catch(() => { });
+        }
+
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('click', playClick);
+        });
+
+        function getParagraphs() { return document.querySelectorAll('.story-card p'); }
+
+        // Ghosts
+        const ghosts = [];
+        for (let i = 0; i < 5; i++) {
+            const g = document.createElement('div');
+            g.className = 'ghost';
+            g.style.left = (Math.random() * 80 + 10) + '%';
+            g.style.top = (Math.random() * 80 + 10) + '%';
+            g.innerHTML = `
+        <div class="eyes">
+          <div class="eye" style="--blink-speed:${(3 + Math.random() * 5).toFixed(2)}s"></div>
+          <div class="eye" style="--blink-speed:${(3 + Math.random() * 5).toFixed(2)}s"></div>
+        </div>`;
+            ghostLayer.appendChild(g);
+            ghosts.push({ el: g, factor: 0.02 + Math.random() * 0.03 });
+        }
+
+        function updateTorch(x, y) {
+            const isLightMode = document.body.classList.contains('theme-light');
+            const paragraphs = getParagraphs();
+
+            if (!isLightMode) {
+                shadow.style.setProperty('--x', `${(x / window.innerWidth) * 100}%`);
+                shadow.style.setProperty('--y', `${(y / window.innerHeight) * 100}%`);
+                bg.style.transform = `translate(${(window.innerWidth / 2 - x) / 50}px, ${(window.innerHeight / 2 - y) / 50}px) scale(1.06)`;
+
+                ghosts.forEach(g => {
+                    g.el.style.transform = `translate(${(window.innerWidth / 2 - x) * g.factor}px, ${(window.innerHeight / 2 - y) * g.factor}px)`;
+                });
+            }
+
+            paragraphs.forEach(p => {
+                if (isLightMode) {
+                    p.classList.remove('pop-effect');
+                    return;
+                }
+                const rect = p.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const dist = Math.hypot(x - centerX, y - centerY);
+                p.classList.toggle('pop-effect', dist < 220);
+            });
+        }
+
+        document.addEventListener('mousemove', (e) => updateTorch(e.clientX, e.clientY));
+        document.addEventListener('touchmove', (e) => {
+            if (!e.touches || !e.touches[0]) return;
+            updateTorch(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+
+        function toggleTheme() {
+            document.body.classList.toggle('theme-light');
+            if (document.body.classList.contains('theme-light')) {
+                getParagraphs().forEach(p => p.classList.remove('pop-effect'));
+            }
+        }
+
+        function toggleMusic() {
+            const musicBtn = document.getElementById('musicBtn');
+            if (bgMusic.paused) {
+                bgMusic.play()
+                    .then(() => { musicBtn.innerText = "Silence"; })
+                    .catch(() => alert("Interact with info first!"));
+            } else {
+                bgMusic.pause();
+                musicBtn.innerText = "Ambient Sound";
+            }
+        }
+
+
+
+        window.addEventListener('scroll', () => {
+            const st = document.documentElement.scrollTop || document.body.scrollTop;
+            const sh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const pct = (st / sh) * 100;
+            document.getElementById('progress-bar').style.width = pct + "%";
+        });
+
+        window.addEventListener('load', () => {
+            updateTorch(window.innerWidth * 0.5, window.innerHeight * 0.35);
+        });
+    </script>
+<script src="story-utils.js"></script>
+</body>
+
+</html>

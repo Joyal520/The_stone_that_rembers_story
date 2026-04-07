@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Pinnacle Desert - Chapter 2</title>
+
+    <style>
+        /* ... (Same CSS as Chapter 1 for consistency) ... */
+        :root {
+            --bg-color: #0a0a0c;
+            --text-color: #e0e0e0;
+            --accent: #d4af37;
+            --card-bg: rgba(20, 20, 25, 0.82);
+            --shadow-opacity: 0.99;
+            --lit-text: #ffffff;
+            --torch-size: 15%;
+            --torch-spread: 45%;
+            --muted: rgba(224, 224, 224, 0.72);
+            --border: rgba(128, 128, 128, 0.22);
+            --soft: rgba(255, 255, 255, 0.06);
+            --danger: #dc2626;
+            --radius: 10px;
+        }
+
+        body.theme-light {
+            --bg-color: #ffffff;
+            --text-color: #09090b;
+            --accent: #1d4ed8;
+            --card-bg: #fdfdfd;
+            --shadow-opacity: 0;
+            --lit-text: #09090b;
+            --muted: rgba(9, 9, 11, 0.70);
+            --border: rgba(0, 0, 0, 0.12);
+            --soft: rgba(0, 0, 0, 0.04);
+            --danger: #b91c1c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: Georgia, "Times New Roman", Times, serif;
+            overflow-x: hidden;
+            transition: background 0.8s ease, color 0.5s ease;
+            min-height: 100vh;
+            touch-action: pan-y;
+        }
+
+        /* Layout */
+        .page {
+            padding: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .page {
+                padding: 48px;
+            }
+        }
+
+        .container-header {
+            max-width: 820px;
+            margin: 0 auto 64px auto;
+            text-align: center;
+            position: relative;
+            z-index: 60;
+        }
+
+        .container-main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding-bottom: 120px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        h1,
+        h2 {
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 6vw, 4rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: clamp(1.1rem, 2.3vw, 1.6rem);
+            font-weight: 300;
+            font-style: italic;
+            opacity: 0.88;
+        }
+
+        /* Background */
+        .parallax-bg {
+            position: fixed;
+            inset: -10%;
+            width: 120%;
+            height: 120%;
+            background:
+                radial-gradient(900px 450px at 30% 20%, rgba(255, 255, 255, 0.06), transparent 60%),
+                radial-gradient(800px 400px at 80% 70%, rgba(255, 255, 255, 0.04), transparent 65%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 40%),
+                #050507;
+            z-index: -2;
+            will-change: transform;
+            transition: opacity 0.8s ease;
+            filter: grayscale(1) brightness(0.9);
+        }
+
+        .bg-image {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            background-image: url("bg.jpg");
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            filter: grayscale(1) brightness(0.25);
+            opacity: 0.9;
+            transition: opacity 0.8s ease;
+        }
+
+        /* UI Enhancements */
+        #progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.1s;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        body.theme-light .parallax-bg {
+            opacity: 0;
+        }
+
+        body.theme-light .bg-image {
+            opacity: 0.28;
+            filter: grayscale(1) brightness(1.2) contrast(0.9);
+            mix-blend-mode: multiply;
+        }
+
+        /* Drop Caps */
+        .story-card p:first-of-type::first-letter {
+            font-family: "Special Elite", serif;
+            font-size: 3.5rem;
+            float: left;
+            line-height: 0.8;
+            margin-right: 0.1em;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Animated Text */
+        .danger {
+            color: var(--danger);
+            font-weight: 800;
+            display: inline-block;
+            animation: shake 5s infinite;
+        }
+
+        .whisper {
+            font-style: italic;
+            letter-spacing: 0.1em;
+            opacity: 0.8;
+            animation: breathe 4s infinite;
+        }
+
+        @keyframes shake {
+
+            0%,
+            90%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            92% {
+                transform: translate(-1px, 1px);
+            }
+
+            94% {
+                transform: translate(1px, -1px);
+            }
+
+            96% {
+                transform: translate(-1px, -1px);
+            }
+
+            98% {
+                transform: translate(1px, 1px);
+            }
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                opacity: 0.8;
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+            }
+
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        /* Torch shadow */
+        .shadow-move {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at var(--x) var(--y),
+                    transparent var(--torch-size),
+                    rgba(0, 0, 0, 0.40) 25%,
+                    rgba(0, 0, 0, var(--shadow-opacity)) var(--torch-spread));
+            pointer-events: none;
+            z-index: 50;
+            will-change: transform;
+            transition: opacity 0.5s ease;
+        }
+
+        body.theme-light .shadow-move {
+            opacity: 0;
+            display: none;
+        }
+
+        /* Ghost layer */
+        .ghost-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        .ghost {
+            position: absolute;
+            width: 120px;
+            height: 200px;
+            opacity: 0.15;
+            filter: blur(15px);
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), transparent);
+            border-radius: 50% 50% 20% 20%;
+            transition: transform 0.2s ease-out;
+        }
+
+        .eyes {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .eye {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white, 0 0 20px white;
+            animation: blink var(--blink-speed) infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            90%,
+            100% {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+
+            95% {
+                transform: scaleY(0);
+                opacity: 0;
+            }
+        }
+
+        body.theme-light .ghost {
+            display: none;
+        }
+
+        /* Cards */
+        .story-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            border-left: 3px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px;
+            line-height: 1.72;
+            font-size: 1.12rem;
+            transition: transform 0.35s ease, background 0.5s ease, border-color 0.5s ease;
+            position: relative;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        @media (min-width: 768px) {
+            .story-card {
+                padding: 34px;
+                font-size: 1.15rem;
+            }
+        }
+
+        body.theme-light .story-card {
+            border-left-color: var(--accent);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.10);
+        }
+
+        .story-card p {
+            margin: 0;
+            transition: transform 0.35s ease, color 0.35s ease, text-shadow 0.35s ease;
+        }
+
+        .story-card p+p {
+            margin-top: 14px;
+        }
+
+        body:not(.theme-light) .pop-effect {
+            transform: scale(1.03);
+            color: var(--lit-text) !important;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.28);
+        }
+
+        .muted {
+            opacity: 0.75;
+            color: var(--muted);
+        }
+
+        .bold {
+            font-weight: 800;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .caps {
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+        }
+
+        .big-center {
+            text-align: center;
+            font-weight: 900;
+            font-size: 1.65rem;
+            margin: 18px 0;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .final-line {
+            text-align: center;
+            font-size: 1.9rem;
+            font-weight: 900;
+            margin-top: 18px;
+            letter-spacing: -0.02em;
+        }
+
+        /* Header buttons */
+        .btn-row {
+            margin-top: 26px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-action {
+            border: 1px solid rgba(128, 128, 128, 0.30);
+            color: var(--text-color);
+            background: var(--card-bg);
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            z-index: 100;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body.theme-light .btn-action {
+            border-color: rgba(0, 0, 0, 0.15);
+            font-weight: 800;
+        }
+
+        .btn-action:hover,
+        .btn-action:active {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.04);
+        }
+
+        /* Flicker */
+        .flicker {
+            animation: flicker-animation 6s infinite;
+        }
+
+        @keyframes flicker-animation {
+
+            0%,
+            90%,
+            100% {
+                opacity: 1;
+            }
+
+            92%,
+            96% {
+                opacity: 0.7;
+            }
+        }
+
+        .help {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            opacity: 0.75;
+        }
+    </style>
+</head>
+
+<body class="page theme-light">
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+    <div class="bg-image" aria-hidden="true"></div>
+    <div id="bg" class="parallax-bg" aria-hidden="true"></div>
+    <div id="shadow" class="shadow-move" style="--x:50%;--y:50%;" aria-hidden="true"></div>
+    <div class="ghost-container" id="ghostLayer" aria-hidden="true"></div>
+
+    <!-- Audio Elements -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="Desert.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickSound" preload="auto">
+        <source src="click.mp3" type="audio/mpeg">
+    </audio>
+
+    <header class="container-header">
+        <h1 class="flicker">CHAPTER 2</h1>
+        <h2>The Long Drive</h2>
+
+        <div class="btn-row">
+            <button onclick="toggleMusic()" id="musicBtn" class="btn-action">Ambient Sound</button>
+            <button onclick="toggleTheme()" id="themeBtn" class="btn-action">Toggle Theme</button>
+            <button onclick="readStory()" id="narrateBtn" class="btn-action">Narrate (Natural)</button>
+        </div>
+    </header>
+
+    <main class="container-main" id="storyRoot">
+
+        <section class="story-card">
+            <p>The city grew smaller in the rear-view mirror. The tall buildings turned into small boxes of light, then
+                disappeared completely into the night.</p>
+            <p>The road ahead was straight and endless. There were no other cars. No trucks. No roadside stalls.</p>
+            <p>Just the black road and the yellow beams of the jeep cutting through the dark.</p>
+        </section>
+
+        <section class="story-card">
+            <p>The Vihaan checked his watch. <span class="bold">11:45 PM.</span></p>
+            <p>He had been driving for three hours. The manager had said the desert started after the old toll gate.</p>
+            <p>Five minutes later, he saw it.</p>
+        </section>
+
+        <section class="story-card">
+            <p>The toll gate was rusted and broken. One of the barriers was bent upward, pointing at the sky like a
+                metal finger.</p>
+            <p class="whisper">There was no one inside the booth.</p>
+            <p>As he drove past it, the air changed.</p>
+            <p>The temperature dropped suddenly inside the jeep. The windows fogged up.</p>
+            <p>The Vihaan wiped the glass with his sleeve. When he looked out again, the landscape had changed.</p>
+        </section>
+
+        <section class="story-card">
+            <p>The trees were gone. The grass was gone.</p>
+            <p>On both sides of the road, there was only sand. Endless, pale sand that seemed to glow faintly under the
+                moonlight.</p>
+            <p class="caps bold">The Pinnacle Desert.</p>
+        </section>
+
+        <section class="story-card">
+            <p>He remembered the manager’s words: <span class="italic">“If you hear things… ignore them.”</span></p>
+            <p>He turned on the radio to break the silence. Static.</p>
+            <p>He changed the station. Static.</p>
+            <p>He turned it off.</p>
+        </section>
+
+        <section class="story-card">
+            <p>Suddenly, the jeep’s engine sputtered. The vehicle slowed down.</p>
+            <p>“No, no, no,” he muttered, pumping the accelerator.</p>
+            <p>The engine coughed once, then died.</p>
+            <p>The jeep rolled to a stop in the middle of the road.</p>
+            <p>Silence returned. Heavier than before.</p>
+        </section>
+
+        <section class="story-card">
+            <p>The Vihaan sat still for a minute, gripping the steering wheel. He didn’t want to go out.</p>
+            <p>But he had to check the engine.</p>
+            <p>He took a deep breath, opened the door, and stepped out.</p>
+        </section>
+
+        <section class="story-card">
+            <p>The sand crunched under his boots. The wind was howling now, a low, mournful sound.</p>
+            <p>He walked to the front of the jeep and lifted the hood. Steam rose up, smelling of burnt oil.</p>
+            <p>“Great,” he whispered.</p>
+            <p>Then he heard it.</p>
+        </section>
+
+        <section class="story-card">
+            <p class="italic whisper">“Help me…”</p>
+            <p>The voice came from the darkness, off the road.</p>
+            <p>The Vihaan froze.</p>
+            <p>“Is someone there?” he called out, his voice shaking.</p>
+            <p class="danger">“Please… water…”</p>
+        </section>
+
+        <section class="story-card">
+            <p>He looked into the desert. About fifty meters away, he saw a figure lying on the sand. A person?</p>
+            <p>He took a step forward.</p>
+            <p>Then he remembered.</p>
+            <p class="bold">“Do not stop. Do not explore.”</p>
+        </section>
+
+        <section class="story-card">
+            <p>He stopped. The figure on the sand moved. It didn’t stand up. It… slithered.</p>
+            <p>It was too long to be human. Too flat.</p>
+            <p>The Vihaan slammed the hood shut and ran back to the driver’s seat. He locked the doors.</p>
+        </section>
+
+        <section class="story-card">
+            <p>He turned the key. The engine whined but didn’t start.</p>
+            <p>Outside, the figure was getting closer. It moved fast, sliding over the sand like a shadow.</p>
+            <p>“Come on!” he shouted, turning the key again.</p>
+            <p>The figure reached the road. It stood up. It had no face.</p>
+        </section>
+
+        <section class="story-card">
+            <p>The engine roared to life.</p>
+            <p>The Vihaan pressed the pedal to the floor. The jeep shot forward just as the thing lunged at the window.
+            </p>
+            <p>He didn’t look back. He drove as fast as the old jeep could go.</p>
+            <p class="final-line">But now, he knew he wasn’t alone.</p>
+        </section>
+
+        <div class="btn-row" style="margin-top: 60px; margin-bottom: 40px;">
+            <button onclick="window.location.href='Frontcover.html'" class="btn-action">Home</button>
+            <button onclick="window.location.href='chapter1.html'" class="btn-action">Previous Chapter</button>
+            <button onclick="window.location.href='chapter3.html'" class="btn-action">Next Chapter</button>
+        </div>
+
+    </main>
+
+    <script>
+        const shadow = document.getElementById('shadow');
+        const bg = document.getElementById('bg');
+        const ghostLayer = document.getElementById('ghostLayer');
+        const bgMusic = document.getElementById('bgMusic');
+        const clickSound = document.getElementById('clickSound');
+
+        bgMusic.volume = 0.3; // Minimal
+
+        function playClick() {
+            clickSound.currentTime = 0;
+            clickSound.play().catch(() => { });
+        }
+
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('click', playClick);
+        });
+
+        function getParagraphs() { return document.querySelectorAll('.story-card p'); }
+
+        // Ghosts
+        const ghosts = [];
+        for (let i = 0; i < 5; i++) {
+            const g = document.createElement('div');
+            g.className = 'ghost';
+            g.style.left = (Math.random() * 80 + 10) + '%';
+            g.style.top = (Math.random() * 80 + 10) + '%';
+            g.innerHTML = `
+        <div class="eyes">
+          <div class="eye" style="--blink-speed:${(3 + Math.random() * 5).toFixed(2)}s"></div>
+          <div class="eye" style="--blink-speed:${(3 + Math.random() * 5).toFixed(2)}s"></div>
+        </div>`;
+            ghostLayer.appendChild(g);
+            ghosts.push({ el: g, factor: 0.02 + Math.random() * 0.03 });
+        }
+
+        function updateTorch(x, y) {
+            const isLightMode = document.body.classList.contains('theme-light');
+            const paragraphs = getParagraphs();
+
+            if (!isLightMode) {
+                shadow.style.setProperty('--x', `${(x / window.innerWidth) * 100}%`);
+                shadow.style.setProperty('--y', `${(y / window.innerHeight) * 100}%`);
+                bg.style.transform = `translate(${(window.innerWidth / 2 - x) / 50}px, ${(window.innerHeight / 2 - y) / 50}px) scale(1.06)`;
+
+                ghosts.forEach(g => {
+                    g.el.style.transform = `translate(${(window.innerWidth / 2 - x) * g.factor}px, ${(window.innerHeight / 2 - y) * g.factor}px)`;
+                });
+            }
+
+            paragraphs.forEach(p => {
+                if (isLightMode) {
+                    p.classList.remove('pop-effect');
+                    return;
+                }
+                const rect = p.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const dist = Math.hypot(x - centerX, y - centerY);
+                p.classList.toggle('pop-effect', dist < 220);
+            });
+        }
+
+        document.addEventListener('mousemove', (e) => updateTorch(e.clientX, e.clientY));
+        document.addEventListener('touchmove', (e) => {
+            if (!e.touches || !e.touches[0]) return;
+            updateTorch(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+
+        function toggleTheme() {
+            document.body.classList.toggle('theme-light');
+            if (document.body.classList.contains('theme-light')) {
+                getParagraphs().forEach(p => p.classList.remove('pop-effect'));
+            }
+        }
+
+        function toggleMusic() {
+            const musicBtn = document.getElementById('musicBtn');
+            if (bgMusic.paused) {
+                bgMusic.play()
+                    .then(() => { musicBtn.innerText = "Silence"; })
+                    .catch(() => alert("Interact with info first!"));
+            } else {
+                bgMusic.pause();
+                musicBtn.innerText = "Ambient Sound";
+            }
+        }
+
+
+
+        window.addEventListener('scroll', () => {
+            const st = document.documentElement.scrollTop || document.body.scrollTop;
+            const sh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const pct = (st / sh) * 100;
+            document.getElementById('progress-bar').style.width = pct + "%";
+        });
+
+        window.addEventListener('load', () => {
+            updateTorch(window.innerWidth * 0.5, window.innerHeight * 0.35);
+        });
+    </script>
+<script src="story-utils.js"></script>
+</body>
+
+</html>
