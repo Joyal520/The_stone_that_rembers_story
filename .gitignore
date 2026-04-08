@@ -1,0 +1,4 @@
+.venv/
+generate_audio.py
+generate_audio_retry.py
+__pycache__/
