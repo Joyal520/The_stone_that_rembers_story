@@ -11,9 +11,6 @@
     <style>
         :root {
             --text-color: #ffffff;
-            --card-bg: rgba(255, 255, 255, 0.1);
-            --card-border: rgba(255, 255, 255, 0.2);
-            --card-hover: rgba(255, 255, 255, 0.2);
         }
 
         * {
@@ -27,238 +24,80 @@
             color: var(--text-color);
             background-color: #0f172a;
             min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* --- Animated Background (Shared with Reading Space) --- */
-        .aurora-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             overflow: hidden;
-        }
-
-        .aurora-light {
-            position: absolute;
-            width: 200vw;
-            height: 200vh;
-            background: radial-gradient(circle at 50% 50%,
-                    rgba(56, 189, 248, 0.15),
-                    rgba(168, 85, 247, 0.15),
-                    rgba(236, 72, 153, 0.15),
-                    transparent 60%);
-            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-            animation: aurora-flow 25s infinite linear;
-            filter: blur(80px);
-            opacity: 0.6;
-        }
-
-        @keyframes aurora-flow {
-            0% {
-                transform: rotate(0deg) translate(0, 0);
-            }
-
-            50% {
-                transform: rotate(180deg) translate(10%, 10%);
-            }
-
-            100% {
-                transform: rotate(360deg) translate(0, 0);
-            }
-        }
-
-        /* --- Layout --- */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
             position: relative;
-            z-index: 1;
         }
 
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-weight: 500;
-            margin-bottom: 3rem;
-            transition: color 0.3s;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 99px;
-            backdrop-filter: blur(5px);
-        }
-
-        .back-btn:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #fbbf24, #d97706);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.8);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* --- Story Layout --- */
-        .story-focus {
+        /* --- Full Screen Cover Layout --- */
+        .full-screen-cover {
             display: flex;
+            flex-direction: column;
             justify-content: center;
-            perspective: 1000px;
-        }
-
-        .story-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            overflow: hidden;
-            backdrop-filter: blur(16px);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
             text-decoration: none;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            max-width: 550px;
+            z-index: 1;
+            padding: 1.5rem;
+        }
+
+        .full-screen-img {
             width: 100%;
-            box-shadow: 0 4px 60px rgba(0, 0, 0, 0.4);
+            height: auto;
+            max-height: calc(100vh - 100px); /* Leave room for CTA button below */
+            object-fit: contain;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
         }
 
-        .story-card:hover {
-            transform: translateY(-12px) rotateX(2deg);
-            background: var(--card-hover);
-            border-color: rgba(251, 191, 36, 0.5);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        .full-screen-cover:hover .full-screen-img {
+            transform: scale(1.02);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
         }
 
-        .thumbnail-container {
-            width: 100%;
-            height: 320px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .thumbnail-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.8s ease;
-        }
-
-        .story-card:hover .thumbnail-img {
-            transform: scale(1.1);
-        }
-
-        .card-content {
-            padding: 2.5rem;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
-        }
-
-        .story-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: #fbbf24;
-        }
-
-        .story-genre {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 1.25rem;
-            font-weight: 600;
-        }
-
-        .story-desc {
-            font-size: 1.05rem;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.7;
-            margin-bottom: 2rem;
+        .cta-overlay {
+            margin-top: 1.5rem;
+            z-index: 10;
         }
 
         .read-btn {
-            margin-top: auto;
-            display: block;
-            padding: 1.2rem 2rem;
+            display: inline-block;
+            padding: 1rem 2.5rem;
             background: #fbbf24;
             border: none;
-            border-radius: 14px;
+            border-radius: 99px;
             color: #000;
             font-weight: 700;
             font-size: 1.1rem;
             text-align: center;
-            transition: all 0.3s;
+            white-space: nowrap; /* Keep on one line */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
         }
 
-        .story-card:hover .read-btn {
+        .full-screen-cover:hover .read-btn {
             background: #ffffff;
-            box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
-            transform: scale(1.02);
+            color: #000;
+            box-shadow: 0 10px 40px rgba(255, 255, 255, 0.4);
+            transform: translateY(-5px);
         }
     </style>
 </head>
 
 <body>
 
-    <div class="aurora-bg">
-        <div class="aurora-light"></div>
-    </div>
-
-    <div class="container">
-        <a href="/reading.html" class="back-btn">← Back to Reading Space</a>
-
-        <div class="header">
-            <h1>Immersive Stories</h1>
-            <p class="subtitle">Experience narratives that pull you in. "The Stone That Remembers" is now available for your exploration.</p>
+    <!-- Main Story Full Screen -->
+    <a href="Frontcover.html" class="full-screen-cover">
+        <img src="coverpage.jpg" alt="The Stone That Remembers" class="full-screen-img"
+            onerror="this.src='https://images.unsplash.com/photo-1542259681-d419a4d74268?q=80&w=1000&auto=format&fit=crop'">
+        <div class="cta-overlay">
+            <span class="read-btn">Start Reading</span>
         </div>
-
-        <div class="story-focus">
-            <!-- Main Story Card -->
-            <a href="Frontcover.html" class="story-card">
-                <div class="thumbnail-container">
-                    <img src="coverpage.png" alt="The Stone That Remembers" class="thumbnail-img"
-                        onerror="this.src='https://images.unsplash.com/photo-1542259681-d419a4d74268?q=80&w=1000&auto=format&fit=crop'">
-                </div>
-                <div class="card-content">
-                    <div class="story-genre">Supernatural Horror</div>
-                    <h3 class="story-title">The Stone That Remembers</h3>
-                    <p class="story-desc">
-                        A delivery across the Pinnacle Desert turns into a reality-bending trial. Time fractures, the sands whisper secrets, and every choice moves you closer to the truth—or deeper into the loop.
-                    </p>
-                    <span class="read-btn">Start Reading</span>
-                </div>
-            </a>
-        </div>
-    </div>
+    </a>
 
 </body>
 
